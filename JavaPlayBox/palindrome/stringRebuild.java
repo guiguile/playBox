@@ -1,7 +1,7 @@
 package palindrome;
 import java.util.Scanner;
 
-public class String2 {
+public class stringRebuild {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         System.out.println("Give the name: ");

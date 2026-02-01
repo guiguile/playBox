@@ -6,7 +6,7 @@ Leave out from inspection special characters (punctuation marks, white spaces an
 package palindrome;
 import java.util.Scanner;
 
-public class palindrome {
+public class twoPointer {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         System.out.print("Input: ");
