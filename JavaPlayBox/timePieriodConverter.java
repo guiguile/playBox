@@ -58,5 +58,7 @@ public class Seconds2
         minutes = seconds / SECONDS_PER_MINUTE;
 
         seconds = seconds % SECONDS_PER_MINUTE;  // remaining seconds
+    }
+}
 
 */
