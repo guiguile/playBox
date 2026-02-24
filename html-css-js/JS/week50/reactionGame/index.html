@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reaction Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #gameArea {
+            width: 600px;
+            height: 400px;
+            margin: 20px auto;
+            border: 2px solid black;
+            position: relative;
+            background-color: #f4f4f4;
+        }
+
+        #shape {
+            position: absolute;
+            cursor: pointer;
+            display: none;
+        }
+
+        #timeDisplay {
+            font-size: 20px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Reaction Game</h2>
+<p>Click the shape as fast as you can!</p>
+
+<div id="gameArea">
+    <div id="shape"></div>
+</div>
+
+<p id="timeDisplay">Reaction Time: </p>
+
+<script>
+
+    const shape = document.getElementById("shape");
+    const gameArea = document.getElementById("gameArea");
+    const timeDisplay = document.getElementById("timeDisplay");
+
+    let startTime;
+
+    function getRandomColor() {
+        return `rgb(${Math.floor(Math.random()*256)}, 
+                    ${Math.floor(Math.random()*256)}, 
+                    ${Math.floor(Math.random()*256)})`;
+    }
+
+    function makeShapeAppear() {
+
+        const maxWidth = gameArea.clientWidth;
+        const maxHeight = gameArea.clientHeight;
+
+        const size = Math.floor(Math.random() * 100) + 50; // 50–150px
+
+        const left = Math.floor(Math.random() * (maxWidth - size));
+        const top = Math.floor(Math.random() * (maxHeight - size));
+
+        shape.style.width = size + "px";
+        shape.style.height = size + "px";
+        shape.style.left = left + "px";
+        shape.style.top = top + "px";
+        shape.style.backgroundColor = getRandomColor();
+
+        // Randomly circle or square
+        if (Math.random() > 0.5) {
+            shape.style.borderRadius = "50%"; // circle
+        } else {
+            shape.style.borderRadius = "0"; // square
+        }
+
+        shape.style.display = "block";
+
+        startTime = new Date().getTime();
+    }
+
+    function appearAfterDelay() {
+        const delay = Math.random() * 2000 + 500; // 0.5–2.5 seconds
+        setTimeout(makeShapeAppear, delay);
+    }
+
+    shape.onclick = function() {
+
+        shape.style.display = "none";
+
+        const endTime = new Date().getTime();
+        const reactionTime = (endTime - startTime) / 1000;
+
+        timeDisplay.textContent = "Reaction Time: " + reactionTime + " seconds";
+
+        appearAfterDelay();
+    };
+
+    appearAfterDelay();
+
+</script>
+
+</body>
+</html>

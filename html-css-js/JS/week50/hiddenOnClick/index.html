@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Squares of Color</title>
+
+  <style>
+    .container {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: flex-start;
+    }
+
+    .square {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      cursor: pointer;
+
+    }
+
+    .red {
+      background-color: red;
+    }
+    
+    .blue {
+      background-color: blue;
+    }
+    
+    .green {
+      background-color: green;
+    }
+    </style>
+    
+</head>
+<body>
+
+  <div class="container">
+    <div class="square red"></div>
+    <div class="square blue"></div>
+    <div class="square green"></div>
+  </div>
+  
+  
+  <script>
+    const squares = document.querySelectorAll(".square");
+
+    // add click listeners to each square
+    squares.forEach(square => {
+      square.addEventListener("click", function() {
+        // hide this square
+        this.style.display = "none";
+        event.stopPropagation();
+      });
+    });
+
+    // listen for clicks on the document
+    document.addEventListener("click", function(){
+      // check if All squares are hidden
+      let allHidden = true;
+
+      squares.forEach(square => {
+        // Check if square is visible (either no inline style or display not 'none')
+        if (square.style.display !== "none" || !square.style.display) {
+          allHidden = false;
+        }
+      });
+
+      // If all squares are hidden, show them all
+      if (allHidden) 
+      {
+        squares.forEach(square => {
+          square.style.display = "block";
+        });
+      }
+    });
+  </script>
+</body>
+</html>

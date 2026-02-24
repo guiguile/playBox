@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Multiplication Game</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .question {
+            margin: 15px;
+            font-size: 20px;
+        }
+
+        input {
+            width: 60px;
+            padding: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .answer {
+            margin-left: 15px;
+            color: green;
+            font-weight: bold;
+        }
+
+        button {
+            margin: 10px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        #feedback {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Multiplication Game</h2>
+
+<div id="game"></div>
+
+<div>
+    <button id="checkBtn">Check</button>
+    <button id="showBtn">Show Answers</button>
+    <button id="resetBtn">Reset</button>
+</div>
+
+<p id="feedback"></p>
+
+<script>
+
+    const gameDiv = document.getElementById("game");
+    const feedback = document.getElementById("feedback");
+
+    let questions = [];
+
+    function generateQuestions() {
+        gameDiv.innerHTML = "";
+        questions = [];
+
+        for (let i = 0; i < 3; i++) {
+
+            let num1 = Math.floor(Math.random() * 11);
+            let num2 = Math.floor(Math.random() * 11);
+            let answer = num1 * num2;
+
+            questions.push(answer);
+
+            gameDiv.innerHTML += `
+                <div class="question">
+                    ${num1} × ${num2} = 
+                    <input type="number" id="input${i}">
+                    <span class="answer" id="answer${i}"></span>
+                </div>
+            `;
+        }
+
+        feedback.textContent = "";
+    }
+
+    document.getElementById("checkBtn").onclick = function() {
+
+        let correctCount = 0;
+
+        for (let i = 0; i < 3; i++) {
+            const userAnswer = Number(document.getElementById(`input${i}`).value);
+
+            if (userAnswer === questions[i]) {
+                correctCount++;
+            }
+        }
+
+        feedback.textContent = `You got ${correctCount} out of 3 correct!`;
+    };
+
+    document.getElementById("showBtn").onclick = function() {
+
+        for (let i = 0; i < 3; i++) {
+            document.getElementById(`answer${i}`).textContent = "→ " + questions[i];
+        }
+
+        feedback.textContent = "";
+    };
+
+    document.getElementById("resetBtn").onclick = function() {
+        generateQuestions();
+    };
+
+    generateQuestions();
+
+</script>
+
+</body>
+</html>

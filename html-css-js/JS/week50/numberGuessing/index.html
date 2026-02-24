@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guess Number</title>
+</head>
+<body>
+  <h3>How many fingers am I holding up?</h3>
+  <input type="text" id="inP">
+  <p id="result" style="color: green; font-size: x-large;"></p>
+  <button type="submit" id="mySub">Guess</button>
+
+  <script>
+    const inp = document.getElementById("inP");
+    const result = document.getElementById("result");
+    const sub = document.getElementById("mySub");
+
+    const answer = Math.floor(Math.random() * 10 + 1);
+    let attempt = 1;
+
+    sub.onclick = function() {
+      
+      if (attempt >= 3) {
+        result.textContent = `OUT OF CHANCE. ANSWER IS ${answer}`;
+        return;
+      }
+
+      let guess = Number(inp.value);
+
+      // Invalid input should NOT count
+      if (isNaN(guess) || inp.value.trim() === "") {
+        result.textContent = "Invalid Input!";
+        return;  // ✅ stop here, don't increase attempt
+      }
+
+      attempt++;  // ✅ count only valid guesses
+
+      if (guess < answer) {
+        result.textContent = `TOO LOW! ${attempt} out of 3 attempts.`;
+      } 
+      else if (guess > answer) {
+        result.textContent = `TOO HIGH! ${attempt} out of 3 attempts.`;
+      } 
+      else {
+        result.textContent = `CORRECT! You guessed in ${attempt} attempts!`;
+        sub.disabled = true; // optional: stop game
+      }
+
+      if (attempt === 3 && guess !== answer) {
+        result.textContent = `OUT OF CHANCE. ANSWER IS ${answer}`;
+        sub.disabled = true;
+      }
+    }
+  </script>
+</body>
+</html>
