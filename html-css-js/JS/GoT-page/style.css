@@ -44,3 +44,8 @@ body {
   padding: 10px;
   width: 70%;
 }
+
+img {
+  width: 80%;
+  height: auto;
+}
