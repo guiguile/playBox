@@ -21,7 +21,7 @@ public class Adder {
 
   public static char Add(char a, char b) {
 
-    return (char)(a+b);
+    return (char)((int)a + (int)b);
 
   }
 

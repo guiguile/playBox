@@ -23,10 +23,18 @@ public class modifiedCounter {
     }
 
     System.out.println("Result as follows: ");
+    boolean anyFound = false;
+
     for (int i=0; i<counts.length;i++){
       if (counts[i]>0){
         System.out.println("Number "+(i-25)+" Occurences is "+ counts[i]);
+        anyFound = true;
       }
+    }
+
+    if (!anyFound) {
+      System.out.println("No valid numbers were entered.");
+      
     }
 
   scan.close();
