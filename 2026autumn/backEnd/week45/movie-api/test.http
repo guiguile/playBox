@@ -1,0 +1,35 @@
+https://example.com/comments/1
+
+### get all movies
+GET http://localhost:3000/movies HTTP/1.1
+
+### Get movie by ID
+GET http://localhost:3000/movies/8
+
+### Invalid movie
+POST http://localhost:3000/movies
+Content-Type: application/json
+
+{
+  "director": "Nobody"
+}
+
+### create first movie
+POST http://localhost:3000/movies HTTP/1.1
+content-type: application/json
+
+{
+  "title": "Blade Runner",
+  "director": "Ridley Scott",
+  "year": 1982
+}
+
+### create another movie
+POST http://localhost:3000/movies HTTP/1.1
+content-type: application/json
+
+{
+  "title": "The great dictator",
+  "director": "Charlie Chaplin",
+  "year": 1940
+}
