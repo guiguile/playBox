@@ -1,7 +1,11 @@
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import NavBar from './components/NavBar.jsx'
 import { views } from './views/index.js'
 import './App.css'
+import TrackerView from './views/TrackerView.jsx'
+import HistoryView from './views/HistoryView.jsx'
+import StatsView from './views/StatsView.jsx'
+import AboutView from './views/AboutView.jsx'
 
 export default function App() {
   const { pathname } = useLocation()
@@ -9,16 +13,19 @@ export default function App() {
 
   return (
     <div className={`app app--${active.accent}`}>
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <NavBar views={views} />
-      <main className="app__content">
+      <main id="main-content" tabIndex={-1} className="app__content">
         <Routes>
-          {views.map(({ id, path, Component }) => (
-            <Route key={id} path={path} element={<Component />} />
-          ))}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route index element={<TrackerView />} />
+          <Route path="/info" element={<AboutView />} />
+          <Route path="/history" element={<HistoryView />} />
+          <Route path="/stats" element={<StatsView />} />
         </Routes>
       </main>
       <footer className="app__footer">Time Tracker · record and analyse your time</footer>
     </div>
   )
 }
+
+
