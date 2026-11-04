@@ -147,6 +147,7 @@ export default function StatsView() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [now, setNow] = useState(Date.now())
+  const [chartTaskId, setChartTaskId] = useState('')
   
 
   const [from, setFrom] = useState(() => {
@@ -154,6 +155,13 @@ export default function StatsView() {
     midnight.setHours(0, 0, 0, 0)
     return toInputValue(midnight)
   })
+
+  const [chartFrom, setChartFrom] = useState(
+  () => toInputValue(new Date()).split('T')[0]
+  )
+  const [chartTo, setChartTo] = useState(
+    () => toInputValue(new Date()).split('T')[0]
+  )
 
   const [to, setTo] = useState(() => toInputValue(new Date()))
 
@@ -248,6 +256,9 @@ export default function StatsView() {
           }))
           .filter((tag) => tag.duration > 0)
       : []
+
+    const selectedChartTask =
+    tasks.find((task) => String(task.id) === chartTaskId) ?? tasks[0]
 
   return (
     <section>
@@ -360,6 +371,50 @@ export default function StatsView() {
           )}
         </div>
       )}
+
+      <div className="card">
+        <h2>Daily activity</h2>
+
+        <div className="range-controls">
+          <div className="field">
+            <label htmlFor="chart-from">First day</label>
+            <input
+              id="chart-from"
+              type="date"
+              value={chartFrom}
+              onChange={(event) => setChartFrom(event.target.value)}
+            />
+          </div>
+
+          <p>Selected task: {selectedChartTask?.name ?? 'No tasks available'}</p>
+
+          <div className="field">
+            <label htmlFor="chart-task">Task for daily chart</label>
+            <select
+              id="chart-task"
+              value={selectedChartTask ? String(selectedChartTask.id) : ''}
+              onChange={(event) => setChartTaskId(event.target.value)}
+              disabled={tasks.length === 0}
+            >
+              {tasks.map((task) => (
+                <option key={task.id} value={String(task.id)}>
+                  {task.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="field">
+            <label htmlFor="chart-to">Last day</label>
+            <input
+              id="chart-to"
+              type="date"
+              value={chartTo}
+              onChange={(event) => setChartTo(event.target.value)}
+            />
+          </div>
+        </div>
+      </div>
     </section>
   )
 }
