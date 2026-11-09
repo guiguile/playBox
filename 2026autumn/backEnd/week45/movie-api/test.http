@@ -4,7 +4,7 @@ https://example.com/comments/1
 GET http://localhost:3000/movies HTTP/1.1
 
 ### Get movie by ID
-GET http://localhost:3000/movies/8
+GET http://localhost:3000/movies/7
 
 ### Invalid movie
 POST http://localhost:3000/movies
@@ -33,3 +33,39 @@ content-type: application/json
   "director": "Charlie Chaplin",
   "year": 1940
 }
+
+### replace a movie
+put  http://localhost:3000/movies/4 HTTP/1.1
+content-type: application/json
+
+{
+  
+  "year": 2026
+}
+
+### delete movie
+DELETE http://localhost:3000/movies/1 HTTP/1.1
+
+
+### Partially update a movie
+PATCH http://localhost:3000/movies/1
+Content-Type: application/json
+
+{
+  "year": 2000
+}
+
+### Filter and sort movies
+GET http://localhost:3000/movies?genre=Sci-Fi&minYear=2000&sort=year
+
+### Invalid query parameter
+GET http://localhost:3000/movies?minYear=invalid
+
+### Delete a movie
+DELETE http://localhost:3000/movies/1
+
+### Delete the same movie again
+DELETE http://localhost:3000/movies/1
+
+### Unknown route
+GET http://localhost:3000/does-not-exist
