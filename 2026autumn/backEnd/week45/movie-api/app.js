@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(morgan('dev'));
  
 // Local in-memory data in our backend (does not persist)
-let movies = [
+/*let movies = [
   {
     id: 1,
     title: "Inception",
@@ -58,7 +58,7 @@ let movies = [
         director: "Another director",
         year: 2026
   },
-];
+]; */
 
 // This works in all POST, PUT and PATCH scenarios (the object might be partial)
 // validation function
@@ -148,7 +148,8 @@ app.get("/", (req, res) => {
 });
 
 // get all movies endpoints. Add support for query parameters and filtering
-app.get("/movies", (req, res) => {
+app.get("/movies", async (req, res, next) => {
+  /*
   let result = [...movies] // result is now all movies
  
     // Let's check if we have some query parameters in the request and
@@ -178,24 +179,47 @@ app.get("/movies", (req, res) => {
   }
 
   res.json(result); // return the possibly filtered results
+  */
+
+  // replace returning the local array with a SQL query:
+  try {
+    const result = await pool.query(
+      "SELECT id, title, director, release_year AS year FROM movies ORDER BY id"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    next(error);
+  }
 });
 
 // get movie by ID
-app.get("/movies/:id", (req, res) => {
+app.get("/movies/:id", async (req, res, next) => {
   const id=Number(req.params.id);
-  const movie=movies.find((movie)=>movie.id===id);
+
+  /*const movie=movies.find((movie)=>movie.id===id);
 
   if(!movie){
     return res.status(404).json({erro: "Movie not found"});
   }
-  res.status(200).json(movie); // status code by default, can be emitted here
+  res.status(200).json(movie); // status code by default, can be emitted here */
+  const result = await pool.query(
+      "SELECT id, title, director, release_year AS year FROM movies WHERE id = $1", [id]);
+
+  if (result.rows.length===0) {
+    return res.status(404).json({
+      error: {
+        code: "MOVIE_NOT_FOUND", message: "Movie not found"}
+    })
+  }
+
+  res.json(result.rows[0]);
 });
 
 // create one
-app.post("/movies", (req, res) => {
+app.post("/movies", async (req, res, next) => {
   const {title, director, year}=req.body;
 
-  errors = validateMovie( req.body, false );
+  /*errors = validateMovie( req.body, false );
     if( errors.length > 0 ){
         return res.status(400).json({
             error: {
@@ -213,12 +237,22 @@ app.post("/movies", (req, res) => {
     year,
   };
   movies.push(newMovie);
-  res.status(201).json(movie);
+  res.status(201).json(movie);*/
+
+  //the database generates the ID, the API returns the created row
+  const result = await pool.query(
+      "INSERT INTO movies (title, director, release_year) VALUES ($1, $2, $3) RETURNING id, title, director, release_year AS year", [
+        title.trim(),
+        director.trim(),
+        year
+      ]);
+
+  res.status(201).json(result.rows[0]);
 });
 
 // put to full replacement of a movie
-app.put('/movies/:id',(req,res) =>{
-  const id = Number(req.params.id);
+app.put('/movies/:id', async(req,res, next) =>{
+  /*const id = Number(req.params.id);
   const index = movies.findIndex( m=> m.id === id);
     if(index === -1) {
       return res.status(404).json({
@@ -238,16 +272,47 @@ app.put('/movies/:id',(req,res) =>{
             }
         })
     }
-
     // if no errors, let's put the new movie data
     movies[index] = {id, ...req.body}; // let's replace all data but id
-    res.json(movies[index]); // the default status code ok =200
+    res.json(movies[index]); // the default status code ok =200*/
 
+    // database PUT method
+    try {
+      const id = Number(req.params.id);
+      const { title, director, year } = req.body;
+
+      const result = await pool.query(
+        `UPDATE movies
+        SET title = $1,
+            director = $2,
+            release_year = $3
+        WHERE id = $4
+        RETURNING
+          id,
+          title,
+          director,
+          release_year AS year`,
+        [title.trim(), director.trim(), year, id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: {
+            code: "MOVIE_NOT_FOUND",
+            message: "Movie not found"
+          }
+        });
+      }
+
+      res.json(result.rows[0]);
+    } catch (error) {
+      next(error);
+    }
 });
 
 // common patch here (patching is partial update, update only some existing fields)
-app.patch('/movies/:id', (req,res)=>{
-  const id = Number(req.params.id);
+app.patch('/movies/:id', async (req,res,next)=>{
+  /*const id = Number(req.params.id);
   const movie = movies.find( m=> m.id === id);
 
     if(!movie) {
@@ -272,13 +337,69 @@ app.patch('/movies/:id', (req,res)=>{
     if(director !== undefined) movie.director = director;
     if(year !== undefined) movie.year = year;
 
-    res.json(movie); // return the movie and OK
+    res.json(movie); // return the movie and OK */
+
+    // database PATCH method needs controlled dynamic SQL
+
+  try {
+    const id = Number(req.params.id);
+    const allowedFields = {
+        title: "title",
+        director: "director",
+        year: "release_year"
+      };
+
+      const setClauses=[];
+      const values = [];
+
+      for (const [field,column] of Object.entries(allowedFields)) {
+        if (req.body[field] !== undefined) {
+          values.push(req.body[field]);
+          setClauses.push(`${column} = $${values.length}`);
+        }
+      }
+
+      // no fields supplied
+      if (setClauses.length===0){
+        return res.status(400).json({
+          error:{
+            code: "NO_FIELDS_TO_UPDATE",
+            message: "Provide at least one field to update"
+          }
+        });
+      }
+
+      values.push(id);
+
+      const query = `
+        UPDATE movies
+        SET ${setClauses.join(",")}
+        WHERE id= $${values.length}
+        RETURNING id, title, director, release_year AS year      
+      `;
+
+      const result = await pool.query(query, values);
+
+      if (result.rows.length===0) {
+        return res.status(404).json({
+          error:{
+            code: "MOVIE_NOT_FOUND",
+            message: "Movie not found"
+          }
+        });
+      }
+
+      res.json(result.rows[0]);
+
+    } catch (error) {
+      next(error);
+    }
 })
 
 // delete here
-app.delete('/movies/:id',(req,res) =>{
+app.delete('/movies/:id', async (req,res,next) =>{
   const id = Number(req.params.id);
-  const index = movies.findIndex( m => m.id === id);
+  /*const index = movies.findIndex( m => m.id === id);
 
   if(index === -1) {
     return res.status(404).json({
@@ -286,7 +407,18 @@ app.delete('/movies/:id',(req,res) =>{
   };
 
   movies.splice(index, 1);
-  res.status(204).send(); // after deletion, return success code 204(means no content, and this must not contain a JSON response body)
+  res.status(204).send(); // after deletion, return success code 204(means no content, and this must not contain a JSON response body) */
+
+  // with database method
+  const result = await pool.query(`
+    DELETE FROM movies WHERE id = $1 RETURNING id`, [id]
+  );
+
+  if (result.rows.length===0) return res.status(404).json({
+    error: { code: "MOVIE_NOT_FOUND", message: "Movie not found"}
+  });
+  res.status(204).send();
+
 });
 
 // add unknown route middleware
@@ -301,7 +433,7 @@ app.use((req, res) => {
 
 // add error-handling middleware
 app.use((err, req, res, next) => {
-  console.error(err);
+  console.error("Unexpected error:", err);
 
   res.status(500).json({
     error: {
@@ -312,9 +444,3 @@ app.use((err, req, res, next) => {
 });
 
 // Now, how to test? Either WebClient (add test case to requests.http or use postman (homework to install and try this))
-  
-
-
-app.listen(PORT,()=>{
-  console.log(`http://localhost:${PORT}`);
-});

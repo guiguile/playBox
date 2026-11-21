@@ -4,7 +4,7 @@ https://example.com/comments/1
 GET http://localhost:3000/movies HTTP/1.1
 
 ### Get movie by ID
-GET http://localhost:3000/movies/7
+GET http://localhost:3000/movies/6
 
 ### Invalid movie
 POST http://localhost:3000/movies
@@ -35,24 +35,25 @@ content-type: application/json
 }
 
 ### replace a movie
-put  http://localhost:3000/movies/4 HTTP/1.1
+put  http://localhost:3000/movies/3 HTTP/1.1
 content-type: application/json
 
-{
-  
-  "year": 2026
+{  
+  "title": "The great dictator",
+  "director": "Charlie Chaplin",
+  "year": 1940
 }
 
 ### delete movie
-DELETE http://localhost:3000/movies/1 HTTP/1.1
+DELETE http://localhost:3000/movies/6 HTTP/1.1
 
 
 ### Partially update a movie
-PATCH http://localhost:3000/movies/1
+PATCH http://localhost:3000/movies/3
 Content-Type: application/json
 
 {
-  "year": 2000
+  "year": 2026
 }
 
 ### Filter and sort movies
