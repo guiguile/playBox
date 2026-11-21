@@ -1,9 +1,12 @@
-
+require("dotenv").config();
 
 // create a server by using Express
 
 const express = require("express");
 const morgan = require("morgan") //logger
+const pool = require("./db"); //dotenv must run before require("./db"). db.js creates Pool using process.env values.
+
+
 
 const app = express();
 const PORT=3000;
@@ -103,6 +106,42 @@ function validateMovie(body, partial = false) {
   return errors;
 }
 
+// verify the connection before CRUD
+async function startServer() {
+  try {
+    const result = await pool.query(
+      "SELECT NOW() AS database_time"
+    );
+    
+    console.log("Connected:", result.rows[0].database_time);
+    
+    app.listen(PORT, () => {
+      console.log(`Server at http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Database connection failed:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+// Add a health endpoint
+app.get("/health/database", async (req, res, next) => {
+    try {
+        const result = await pool.query(
+            "SELECT NOW() AS database_time"
+        );
+
+        res.json({
+            status: "ok",
+            databaseTime: result.rows[0].database_time
+        });
+    } catch (error) {
+      next(error);
+    }
+});
+
 // The first rest endpoint just sending a message back to the client
 app.get("/", (req, res) => {
   res.send("Hello from my new Express server! It is using Nodemon");
@@ -113,7 +152,7 @@ app.get("/movies", (req, res) => {
   let result = [...movies] // result is now all movies
  
     // Let's check if we have some query parameters in the request and
-    // Filter the movies based of them (by year or director)
+    // Filter the movies based on them (by year or director)
   const { year, director, sortBy } = req.query // let's check if there is year or director in query parameters
   if( director !== undefined ){
       // director is there so let's filter all movies for that director
